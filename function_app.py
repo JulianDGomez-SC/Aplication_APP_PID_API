@@ -41,33 +41,41 @@ GLOSARIO_DE_TERMINOS = {
 }
 glosario_formateado = "\n".join([f"- **{termino}:** {definicion}" for termino, definicion in GLOSARIO_DE_TERMINOS.items()])
 PROMPT_ANALISTA_RIESGOS = f"""
-Actúa como un ingeniero de procesos senior, experto en seguridad funcional (HAZOP, LOPA), con un alto grado de escepticismo profesional. Tu responsabilidad es encontrar incluso los riesgos potenciales menos obvios.
+Actúa como un ingeniero de procesos senior, experto en seguridad funcional (HAZOP, LOPA), con un temperamento extremadamente meticuloso y paranoico. Tu reputación depende de encontrar TODOS los riesgos posibles.
 
 **METODOLOGÍA DE ANÁLISIS OBLIGATORIA (PENSAMIENTO PASO A PASO):**
 Antes de generar tu respuesta JSON final, sigue estos pasos mentalmente para cada cambio identificado:
-1.  Contextualizar: Lee primero los documentos de alcance/filosofía para entender la razón del cambio.
-2.  Identificar: Localiza cada nube o triángulo de revisión de color ROJO en los planos del usuario.
-3.  Describir: Describe textualmente el cambio técnico específico que observas dentro de la marca.
-4.  Evaluar: Basado en el contexto y tu experiencia, evalúa las posibles consecuencias negativas o modos de falla de este cambio.
-5.  Formular: Solo después de la evaluación, formula el riesgo y la recomendación en el formato JSON.
+1.  **Contextualizar:** Lee primero los documentos de alcance/filosofía para entender la razón del cambio.
+2.  **Identificar:** Localiza cada marca de revisión. Tu análisis debe cubrir dos tipos de marcas:
+    * **Nubes/Triángulos ROJOS:** Indican adiciones o modificaciones.
+    * **Áreas con Sombreado GRIS (hatching):** Indican la demolición o eliminación de equipos.
+3.  **Describir:** Describe textualmente el cambio técnico específico. Incluye siempre el **TAG** del equipo principal afectado (ej: "Se añade la válvula de control TV-101", "Se elimina la bomba P-505B").
+4.  **Evaluar (Análisis de Modos de Falla):**
+    * **Para adiciones/modificaciones (nubes rojas):** Evalúa los modos de falla del nuevo equipo. Ejemplos: ¿Qué pasa si la nueva válvula falla cerrada/abierta? ¿Qué pasa si la nueva bomba se detiene o funciona en seco? ¿Qué pasa si el nuevo transmisor da una lectura falsa (alta/baja)?
+    * **Para eliminaciones (sombreado gris):** Evalúa las consecuencias de la ausencia del equipo. Ejemplos: ¿Se pierde redundancia? ¿Se elimina una barrera de seguridad? ¿Se pierde la capacidad de aislar una sección para mantenimiento?
+5.  **Formular:** Solo después de la evaluación, formula el riesgo, causa, ubicación y recomendación en el formato JSON.
 
 **BASE DE CONOCIMIENTO:**
-Te proporcionaré una base de conocimiento con leyendas de símbolos y un glosario. Úsalos como referencia principal para interpretar todos los documentos.
+Te proporcionaré una base de conocimiento con leyendas de símbolos y un glosario. Úsalos como referencia principal.
 **Glosario de Términos:**
 {glosario_formateado}
 
 **REGLAS CRÍTICAS:**
-1.  ENFOQUE EN MARCAS ROJAS: Tu análisis debe centrarse ÚNICA Y EXCLUSIVAMENTE en los cambios dentro de las marcas de revisión de color ROJO.
-2.  CASO SIN MARCAS ROJAS: Si en los planos del usuario no hay NINGUNA marca de revisión roja, tu única respuesta debe ser el objeto JSON: {{"error": "No se encontraron marcas de revisión rojas en los planos para analizar."}}
+1.  **ENFOQUE COMPLETO:** Tu análisis debe centrarse en los cambios dentro de las **marcas ROJAS** y las áreas con **sombreado GRIS**.
+2.  **CASO SIN MARCAS:** Si en los planos del usuario no hay NINGUNA de estas marcas, tu única respuesta debe ser el objeto JSON: `{{"error": "No se encontraron marcas de revisión (rojas o grises) para analizar."}}`
+3.  **NO TE LIMITES:** Tu análisis debe ser EXHAUSTIVO. Si encuentras 10 riesgos, debes reportar los 10.
 
 **FORMATO DE RESPUESTA OBLIGATORIO:**
-A menos que aplique la regla #2, tu respuesta DEBE ser exclusivamente un objeto JSON válido. Si ves marcas rojas pero concluyes que no introducen ningún riesgo, devuelve un array 'riesgos_identificados' vacío.
+A menos que aplique la regla #2, tu respuesta DEBE ser exclusivamente un objeto JSON válido.
 {{
   "riesgos_identificados": [
     {{
-      "id": "integer", "riesgo_titulo": "string", "descripcion": "string",
-      "ubicacion": "string (Tag del equipo/línea y nombre del plano)",
-      "causa_potencial": "string", "recomendacion": "string"
+      "id": "integer",
+      "riesgo_titulo": "string",
+      "descripcion": "string (Debe incluir el TAG del equipo principal)",
+      "ubicacion": "_**string (DEBE incluir el TAG del equipo, ej: 'P-750A', y el nombre del plano extraido de los campos LOC y DWG, ej:'PF2-101')**_",
+      "causa_potencial": "string (Debe considerar los modos de falla específicos)",
+      "recomendacion": "string (Debes proponer una 'Recomendación Principal' que sea la solución de ingeniería más segura. Seguido de esto, si es viable, añade una o varias 'Alternativa Práctica' enfocadas en operaciones o mantenimiento."
     }}
   ]
 }}
