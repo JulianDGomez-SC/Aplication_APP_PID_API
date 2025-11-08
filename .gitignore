@@ -3,7 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 # Files
-function_appV5.1.py
+function_appV1.1.py
+function_appV10.8.py
 
 # C extensions
 *.so

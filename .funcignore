@@ -6,3 +6,5 @@ __queuestorage__
 local.settings.json
 test
 .venv
+function_appV1.1
+function_appV10.8
